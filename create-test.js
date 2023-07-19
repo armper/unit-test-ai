@@ -1,18 +1,18 @@
+const path = require('path');
 const fs = require('fs');
-// const axios = require('axios');
-// change 2
-// The first argument to the script is the path to the TypeScript file
-const tsFilePath = process.argv[2];
 
-// Read the TypeScript file
-fs.readFile(tsFilePath, 'utf8', function(err, tsCode) {
+// The first argument to the script is the path to the TypeScript or HTML file
+const filePath = process.argv[2];
+
+// Read the file
+fs.readFile(filePath, 'utf8', function(err, fileContent) {
     if (err) {
-        console.error(`Error reading file ${tsFilePath}:`, err);
+        console.error(`Error reading file ${filePath}:`, err);
         return;
     }
 
-    // Pretend to send the TypeScript code to the OpenAI API
-    console.log(`Sending TypeScript code to OpenAI API: ${tsCode}`);
+    // Pretend to send the file content to the OpenAI API
+    console.log(`Sending content to OpenAI API: ${fileContent}`);
 
     // The API would return the unit test code
     // For now, just log a fake response
@@ -20,8 +20,14 @@ fs.readFile(tsFilePath, 'utf8', function(err, tsCode) {
 
     console.log(`Received unit test code from OpenAI API: ${fakeApiResponse}`);
 
-    // Replace .ts with .spec.ts to get the test file path
-    const specFilePath = tsFilePath.replace('.ts', '.spec.ts');
+    // Get the directory of the file
+    const dirName = path.dirname(filePath);
+
+    // Get the base name of the file
+    const baseName = path.basename(filePath, path.extname(filePath));
+
+    // Construct the spec file path
+    const specFilePath = path.join(dirName, baseName + '.spec.ts');
 
     // Write the unit test code to the .spec.ts file
     fs.writeFile(specFilePath, fakeApiResponse, function(err) {

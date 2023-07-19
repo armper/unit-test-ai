@@ -1,5 +1,5 @@
 const fs = require('fs');
-const axios = require('axios');
+// const axios = require('axios');
 
 // The first argument to the script is the path to the TypeScript file
 const tsFilePath = process.argv[2];

@@ -13,11 +13,16 @@ pipeline {
             }
         }
 
-        stage('Analyze Changes') {
+        stage('Analyze Changed Files') {
             steps {
-                // Analyze the changed files (you'll need to implement this part)
-            }
-        }
+                script {
+                    // Get the list of changed files
+                    sh 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT > changed_files.txt'
+                    // Run the Python script to analyze the changed files
+                    sh 'python3 analyze_changes.py'
+                }
+    }
+}
 
         stage('Generate Unit Test') {
             steps {
@@ -36,18 +41,16 @@ pipeline {
         }
 
         stage('Fix Errors and Re-run Tests') {
-            when {
-                // Condition to check if there were any test errors (you'll need to implement this part)
-            }
-            steps {
-                script {
-                    // Call a Python script to fix errors through OpenAI and update the test code
-                    sh 'python3 fix_errors.py'
-                    // Re-run the tests with the fixed code
-                    sh 'mvn test'
-                }
-            }
+    steps {
+        script {
+            // Call the Python script to check for errors, fix them, and update the test code
+            sh 'python3 fix_errors.py'
+            // Re-run the tests with the fixed code
+            sh 'mvn test'
         }
+    }
+}
+
 
         stage('Commit and Push Generated Test') {
             steps {

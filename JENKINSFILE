@@ -21,8 +21,8 @@ pipeline {
                     // Run the Python script to analyze the changed files
                     sh 'python3 analyze_changes.py'
                 }
-    }
-}
+            }
+        }
 
         stage('Generate Unit Test') {
             steps {
@@ -41,27 +41,30 @@ pipeline {
         }
 
         stage('Fix Errors and Re-run Tests') {
-    steps {
-        script {
-            // Call the Python script to check for errors, fix them, and update the test code
-            sh 'python3 fix_errors.py'
-            // Re-run the tests with the fixed code
-            sh 'mvn test'
-        }
-    }
-}
-
-
-        stage('Commit and Push Generated Test') {
             steps {
-                sh '''
-                    git add path/to/new_unit_test_file.java
-                    git commit -m "Add generated unit test for feature XYZ"
-                    git push origin feature-branch-name
-                '''
+                script {
+                    // Call the Python script to check for errors, fix them, and update the test code
+                    sh 'python3 fix_errors.py'
+                    // Re-run the tests with the fixed code
+                    sh 'mvn test'
+                }
             }
         }
 
-        // Other stages (e.g., build and deploy) as needed
+        stage('Commit and Push Generated Test') {
+            steps {
+                script {
+                    // Read the path from the file
+                    def testFilePath = readFile('generated_test_path.txt').trim()
+                    sh '''
+                git add ${testFilePath}
+                git commit -m "Add or update generated unit test for feature XYZ"
+                git push origin feature-branch-name
+            '''
+                }
+            }
+        }
+
+    // Other stages (e.g., build and deploy) as needed
     }
 }

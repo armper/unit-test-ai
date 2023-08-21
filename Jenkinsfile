@@ -14,6 +14,14 @@ pipeline {
             }
         }
 
+        stage('Clean Workspace') {
+            steps {
+                // Clean the Maven build
+                sh 'mvn clean'
+                echo 'Cleaned the Maven workspace.'
+            }
+        }
+
         stage('Analyze Changed Files') {
             steps {
                 script {
@@ -73,6 +81,6 @@ pipeline {
             }
         }
 
-        // Other stages (e.g., build and deploy) as needed
+    // Other stages (e.g., build and deploy) as needed
     }
 }

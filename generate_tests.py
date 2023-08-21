@@ -11,7 +11,7 @@ def call_openai_to_generate_test(class_code):
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FakeTest {{
+public class DemoApplicationtest {{
     @Test
     public void testAlwaysPasses() {{
         assertTrue(true);

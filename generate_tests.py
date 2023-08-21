@@ -37,7 +37,6 @@ public class FakeTest {{
 
 
 def generate_tests_for_class(class_path):
-    # ... [rest of the code remains unchanged]
 
     # Extract the class name from the file path
     class_name = os.path.basename(class_path).replace('.java', '')

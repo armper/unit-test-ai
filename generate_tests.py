@@ -79,7 +79,9 @@ with open('changed_files.txt', 'r') as file:
 # Iterate through the changed files and generate tests for each class
 for class_path in changed_files:
     class_path = class_path.strip()  # Remove newline characters
-    if class_path.endswith('.java'):  # Check if the file is a Java class
+    
+    # Check if the file is a Java class and not from the "src/test" directory
+    if class_path.endswith('.java') and "src/test" not in class_path:
         test_file_path = generate_tests_for_class(class_path)
         if test_file_path:
             # Write the path to a file for use in the Jenkins pipeline

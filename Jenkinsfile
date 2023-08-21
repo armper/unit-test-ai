@@ -6,8 +6,12 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clean Workspace and Checkout') {
             steps {
+                // Clean the Jenkins workspace
+                deleteDir()
+                echo 'Cleaned the Jenkins workspace.'
+
                 // Checkout your code from the feature branch
                 checkout scm
                 echo 'Checked out the code.'

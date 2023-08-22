@@ -77,16 +77,16 @@ pipeline {
                     echo "Path to the generated test file: ${testFilePath}"
 
                     // Set Git user name and email
-                    sh '''
-            git config user.email "jenkins@example.com"
-            git config user.name "Jenkins"
-            '''
+                    sh 'git config user.email "jenkins@example.com"'
+                    sh 'git config user.name "Jenkins"'
 
-                    sh '''
-            git add "${testFilePath}"
-            git commit -m "Add or update generated unit test for feature XYZ"
-            git push origin feature-branch-name
-            '''
+                    // Add the file to git
+                    sh "git add ${testFilePath}"
+
+                    // Commit and push
+                    sh 'git commit -m "Add or update generated unit test for feature XYZ"'
+                    sh 'git push origin feature-branch-name'
+
                     echo 'Committed and pushed the generated test.'
                 }
             }

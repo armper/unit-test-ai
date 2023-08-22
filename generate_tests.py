@@ -1,12 +1,22 @@
+import openai
 import os
 import requests
 import json
 
 
-def call_openai_to_generate_test(class_code):
+def extract_package_declaration(class_code):
+    """
+    Extract the package declaration from the given Java class code.
+    """
+    for line in class_code.split('\n'):
+        line = line.strip()
+        if line.startswith("package "):
+            return line
+
+
+def call_openai_to_generate_test(class_code, existing_test_code=None):
     # Check if we're in fake testing mode
     if os.environ.get('FAKE_TESTING_MODE') == 'True':
-        # Return a basic boilerplate JUnit test that always succeeds
         return f'''
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,26 +28,42 @@ public class DemoApplicationtest {{
     }}
 }}
 '''
-    # Assuming the API key is set as an environment variable
-    api_key = os.environ['OPENAI_API_KEY']
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {api_key}',
-    }
-    data = {
-        'prompt': f'Generate a unit test for the following Java class: {class_code}',
-    }
-    response = requests.post(
-        'https://api.openai.com/v1/engines/davinci-codex/completions', headers=headers, json=data)
-    if response.status_code == 200:
-        return json.loads(response.text)['choices'][0]['text']
+    # Set the API key
+    openai.api_key = os.environ['OPENAI_API_KEY']
+
+    # Create a message for ChatGPT based on whether an existing test code is provided
+    if existing_test_code:
+        message_content = f'Update the following unit test for the Java class using only org.junit.jupiter: {class_code}\nExisting Test:\n{existing_test_code}'
     else:
-        print(f'Error: {response.text}')
+        message_content = f'Generate a unit test for the following Java class using only org.junit.jupiter: {class_code}'
+
+    message = {
+        "role": "user",
+        "content": message_content
+    }
+
+    # Call ChatGPT
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo", messages=[message])
+
+    # Extract the generated test code from the response
+    test_code = response.choices[0].message.content.strip()
+
+    # Extract the package declaration from the class code
+    package_declaration = extract_package_declaration(class_code)
+
+    # Check if the generated test code has a package declaration
+    if package_declaration and "package " not in test_code:
+        test_code = package_declaration + "\n\n" + test_code
+
+    if test_code:
+        return test_code
+    else:
+        print("Failed to generate test code.")
         return None
 
 
 def generate_tests_for_class(class_path):
-
     # Extract the class name from the file path
     class_name = os.path.basename(class_path).replace('.java', '')
 
@@ -48,28 +74,27 @@ def generate_tests_for_class(class_path):
     with open(class_path, 'r') as file:
         class_code = file.read()
 
-    # Call OpenAI to generate the test code
-    test_code = call_openai_to_generate_test(class_code)
+    # Check if the test file already exists
+    existing_test_path = test_base_path.replace(
+        f'{class_name}.java', f'{class_name}Test.java')
+
+    existing_test_code = None
+    if os.path.exists(existing_test_path):
+        with open(existing_test_path, 'r') as file:
+            existing_test_code = file.read()
+
+    # Call OpenAI to generate or update the test code
+    test_code = call_openai_to_generate_test(class_code, existing_test_code)
     if test_code is None:
         print(f"Failed to generate test for {class_path}")
         return None
 
-    # Check if the test file already exists
-    existing_test_path = test_base_path.replace(
-        f'{class_name}.java', f'{class_name}Test.java')
-    if os.path.exists(existing_test_path):
-        test_file_path = existing_test_path
-    else:
-        # If not, create a new test file with the appropriate name and path
-        test_file_path = test_base_path.replace(
-            f'{class_name}.java', f'{class_name}test.java')
-
     # Write the test code to the file
-    with open(test_file_path, 'w') as file:
+    with open(existing_test_path if existing_test_code else test_base_path.replace(f'{class_name}.java', f'{class_name}Test.java'), 'w') as file:
         file.write(test_code)
 
     # Return the path for use in the Jenkins pipeline
-    return test_file_path
+    return existing_test_path if existing_test_code else test_base_path.replace(f'{class_name}.java', f'{class_name}Test.java')
 
 
 # Read the changed files from the file generated earlier in the Jenkins pipeline
@@ -79,7 +104,7 @@ with open('changed_files.txt', 'r') as file:
 # Iterate through the changed files and generate tests for each class
 for class_path in changed_files:
     class_path = class_path.strip()  # Remove newline characters
-    
+
     # Check if the file is a Java class and not from the "src/test" directory
     if class_path.endswith('.java') and "src/test" not in class_path:
         test_file_path = generate_tests_for_class(class_path)

@@ -83,7 +83,7 @@ pipeline {
             '''
 
                     sh '''
-            git add ${testFilePath}
+            git add "${testFilePath}"
             git commit -m "Add or update generated unit test for feature XYZ"
             git push origin feature-branch-name
             '''

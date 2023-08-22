@@ -78,7 +78,7 @@ pipeline {
 
                     // Set Git user name and email
                     sh 'git config user.email "aleoperea@yahoo.com"'
-                    sh 'git config user.name "Armando Perea"'
+                    sh 'git config user.name "Jenkins AI"'
 
                     // Add the file to git
                     sh "git add ${testFilePath}"
@@ -86,8 +86,13 @@ pipeline {
                     // Commit
                     sh 'git commit -m "Add or update generated unit test for feature XYZ"'
 
-                    // Push to the branch that triggered the build
-                    sh "git push origin ${env.GIT_BRANCH}"
+                    // Use credentials to push to the branch
+                    withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        sh '''
+                git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git
+                git push origin ${env.GIT_BRANCH}
+                '''
+                    }
 
                     echo 'Committed and pushed the generated test.'
                 }

@@ -75,10 +75,17 @@ pipeline {
                     // Read the path from the file
                     def testFilePath = readFile('generated_test_path.txt').trim()
                     echo "Path to the generated test file: ${testFilePath}"
+
+                    // Set Git user name and email
                     sh '''
-                git add ${testFilePath}
-                git commit -m "Add or update generated unit test for feature XYZ"
-                git push origin feature-branch-name
+            git config user.email "jenkins@example.com"
+            git config user.name "Jenkins"
+            '''
+
+                    sh '''
+            git add ${testFilePath}
+            git commit -m "Add or update generated unit test for feature XYZ"
+            git push origin feature-branch-name
             '''
                     echo 'Committed and pushed the generated test.'
                 }

@@ -83,9 +83,11 @@ pipeline {
                     // Add the file to git
                     sh "git add ${testFilePath}"
 
-                    // Commit and push
+                    // Commit
                     sh 'git commit -m "Add or update generated unit test for feature XYZ"'
-                    sh 'git push origin feature-branch-name'
+
+                    // Push to the branch that triggered the build
+                    sh "git push origin ${env.GIT_BRANCH}"
 
                     echo 'Committed and pushed the generated test.'
                 }

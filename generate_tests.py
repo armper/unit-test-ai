@@ -30,6 +30,7 @@ public class DemoApplicationtest {{
 '''
     # Set the API key
     openai.api_key = os.environ['OPENAI_API_KEY']
+    print(f"Using API Key: {openai.api_key}")
 
     # Create a message for ChatGPT based on whether an existing test code is provided
     if existing_test_code:

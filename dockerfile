@@ -9,8 +9,8 @@ RUN apt-get update && \
     apt-get install -y maven python3 python3-pip git && \
     rm -rf /var/lib/apt/lists/*
 
-# Optionally, install any Python packages you might need
-RUN pip3 install requests
+# Install Python packages: requests and openai
+RUN pip3 install requests openai
 
 # Switch back to the Jenkins user
 USER jenkins

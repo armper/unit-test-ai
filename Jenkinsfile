@@ -77,8 +77,8 @@ pipeline {
                     echo "Path to the generated test file: ${testFilePath}"
 
                     // Set Git user name and email
-                    sh 'git config user.email "jenkins@example.com"'
-                    sh 'git config user.name "Jenkins"'
+                    sh 'git config user.email "aleoperea@yahoo.com"'
+                    sh 'git config user.name "Jenkins AI Unit Test"'
 
                     // Add the file to git
                     sh "git add ${testFilePath}"

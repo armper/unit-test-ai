@@ -15,37 +15,36 @@ def extract_package_declaration(class_code):
 
 
 def call_openai_to_generate_test(class_code, existing_test_code=None):
-    # Check if we're in fake testing mode
-    if os.environ.get('FAKE_TESTING_MODE') == 'True':
-        return f'''
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DemoApplicationtest {{
-    @Test
-    public void testAlwaysPasses() {{
-        assertTrue(true);
-    }}
-}}
-'''
     # Set the API key
     openai.api_key = os.environ['OPENAI_API_KEY']
     print(f"Using API Key: {openai.api_key}")
 
     # Create a message for ChatGPT based on whether an existing test code is provided
     if existing_test_code:
-        message_content = f'Update the following unit test for the Java class using only org.junit.jupiter: {class_code}\nExisting Test:\n{existing_test_code}'
+        user_message = f'Update the following unit test for the Java class: {class_code}\nExisting Test:\n{existing_test_code}'
     else:
-        message_content = f'Generate a unit test for the following Java class using only org.junit.jupiter: {class_code}'
+        user_message = f'Generate a unit test for the following Java class: {class_code}'
 
-    message = {
-        "role": "user",
-        "content": message_content
-    }
+    messages = [
+        {
+            "role": "system",
+            "content": "You will be provided with a piece of Java code, and your task is to return a complete unit test for that code. Use only Junit 5. Return nothing but the code with no additional text."
+        },
+        {
+            "role": "user",
+            "content": user_message
+        }
+    ]
 
     # Call ChatGPT
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo", messages=[message])
+        model="gpt-4", messages=messages,
+        temperature=0,
+        max_tokens=8191,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0)
 
     # Extract the generated test code from the response
     test_code = response.choices[0].message.content.strip()

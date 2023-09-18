@@ -29,6 +29,4 @@ public class MortgageService {
 
         return rate;
     }
-
-    
 }

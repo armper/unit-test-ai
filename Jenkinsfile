@@ -47,39 +47,40 @@ pipeline {
             }
         }
 
-        // Flag to track if the tests failed
-        def testFailed = false
+        stages {
+            stage('Run Generated Unit Tests') {
+                steps {
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        // Run the unit tests
+                        sh 'mvn test'
+                        echo 'Ran the generated unit tests.'
+                    }
+                }
+                post {
+                    failure {
+                        script {
+                            // Set the flag if this stage failed
+                            env.testFailed = 'true'
+                        }
+                    }
+                }
+            }
 
-        stage('Run Generated Unit Tests') {
-            steps {
-                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                    // Run the unit tests
-                    sh 'mvn test'
-                    echo 'Ran the generated unit tests.'
+            stage('Fix Errors and Re-run Tests') {
+                // Only run this stage if the testFailed flag is set
+                when {
+                    expression {
+                        return env.testFailed == 'true'
+                    }
                 }
-            }
-            post {
-                failure {
-                    // Set the flag if this stage failed
-                    testFailed = true
-                }
-            }
-        }
-
-        stage('Fix Errors and Re-run Tests') {
-            // Only run this stage if the testFailed flag is set
-            when {
-                expression {
-                    return testFailed
-                }
-            }
-            steps {
-                script {
-                    // Call the Python script to check for errors, fix them, and update the test code
-                    sh 'python3 fix_errors.py'
-                    echo 'Checked and fixed errors if any.'
-                    // Re-run the tests with the fixed code
-                    sh 'mvn test'
+                steps {
+                    script {
+                        // Call the Python script to check for errors, fix them, and update the test code
+                        sh 'python3 fix_errors.py'
+                        echo 'Checked and fixed errors if any.'
+                        // Re-run the tests with the fixed code
+                        sh 'mvn test'
+                    }
                 }
             }
         }

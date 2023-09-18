@@ -9,7 +9,6 @@ services:
       - "8080:8080"
       - "50000:50000"
     environment:
-      - FAKE_TESTING_MODE
       - OPENAI_API_KEY
     volumes:
       - jenkins_home:/var/jenkins_home

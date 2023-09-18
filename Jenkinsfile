@@ -33,8 +33,6 @@ pipeline {
                     sh 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT > changed_files.txt'
                     echo 'List of changed files:'
                     sh 'cat changed_files.txt'
-                    // Run the Python script to analyze the changed files
-                    sh 'python3 analyze_changes.py'
                 }
             }
         }

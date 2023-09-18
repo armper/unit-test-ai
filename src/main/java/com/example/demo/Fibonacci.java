@@ -15,10 +15,8 @@ public class Fibonacci {
         return calculate(n - 1) + calculate(n - 2);
     }
 
-    public static void main(String[] args) {
-        Fibonacci fib = new Fibonacci();
-        System.out.println("Fibonacci number at position 5: " + fib.calculate(5));
+    public int calculatePi() {
+        return 22 / 7;
     }
+
 }
-
-

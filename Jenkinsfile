@@ -47,15 +47,32 @@ pipeline {
             }
         }
 
+        // Flag to track if the tests failed
+        def testFailed = false
+
         stage('Run Generated Unit Tests') {
             steps {
-                // Commands to run the unit tests using your Java testing framework
-                sh 'mvn test'
-                echo 'Ran the generated unit tests.'
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    // Run the unit tests
+                    sh 'mvn test'
+                    echo 'Ran the generated unit tests.'
+                }
+            }
+            post {
+                failure {
+                    // Set the flag if this stage failed
+                    testFailed = true
+                }
             }
         }
 
         stage('Fix Errors and Re-run Tests') {
+            // Only run this stage if the testFailed flag is set
+            when {
+                expression {
+                    return testFailed
+                }
+            }
             steps {
                 script {
                     // Call the Python script to check for errors, fix them, and update the test code

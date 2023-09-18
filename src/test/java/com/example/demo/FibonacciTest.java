@@ -21,4 +21,10 @@ public class FibonacciTest {
         assertEquals(34, fib.calculate(9));
         assertEquals(55, fib.calculate(10));
     }
+
+    @Test
+    public void testCalculatePi() {
+        Fibonacci fib = new Fibonacci();
+        assertEquals(3, fib.calculatePi());
+    }
 }

@@ -20,4 +20,3 @@ public class Fibonacci {
         System.out.println("Fibonacci number at position 5: " + fib.calculate(5));
     }
 }
- 

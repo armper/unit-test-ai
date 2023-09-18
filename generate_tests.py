@@ -41,7 +41,6 @@ def call_openai_to_generate_test(class_code, existing_test_code=None):
     response = openai.ChatCompletion.create(
         model="gpt-4", messages=messages,
         temperature=0,
-        max_tokens=8191,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0)

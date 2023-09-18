@@ -47,8 +47,7 @@ pipeline {
             }
         }
 
-        stages {
-            stage('Run Generated Unit Tests') {
+        stage('Run Generated Unit Tests') {
                 steps {
                     catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
                         // Run the unit tests
@@ -66,7 +65,7 @@ pipeline {
                 }
             }
 
-            stage('Fix Errors and Re-run Tests') {
+        stage('Fix Errors and Re-run Tests') {
                 // Only run this stage if the testFailed flag is set
                 when {
                     expression {
@@ -83,7 +82,6 @@ pipeline {
                     }
                 }
             }
-        }
 
         stage('Commit and Push Generated Test') {
             steps {

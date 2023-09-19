@@ -19,16 +19,4 @@ public class MortgageService {
         return monthlyPayment;
     }
 
-    /*
-     * Calculate the rate for a given principal, monthly payment and years.
-     */
-    public double calculateRate(double principal, double monthlyPayment, double years) {
-        double numberOfPayments = years * 12;
-
-        double rate = 12 * (Math.pow(monthlyPayment, 1 / numberOfPayments) - 1);
-
-        return rate;
-    }
-
-    
 }

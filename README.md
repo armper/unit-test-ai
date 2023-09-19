@@ -1,6 +1,6 @@
-# Java Maven Project CI/CD Pipeline
+# Java Maven Project CI/CD Pipeline with Docker Support
 
-This repository contains a Java Maven project that utilizes a Jenkins pipeline to automate various stages of the development lifecycle, including the generation of unit tests.
+This repository contains a Java Maven project that utilizes a Jenkins pipeline to automate various stages of the development lifecycle, including the generation of unit tests. Additionally, this project provides a `docker-compose.yml` and a `Dockerfile` to set up a Jenkins environment with all the necessary prerequisites.
 
 ## Pipeline Overview
 
@@ -23,11 +23,39 @@ This repository contains a Java Maven project that utilizes a Jenkins pipeline t
 - Git installed on the Jenkins agent.
 - Maven installed on the Jenkins agent.
 
-## Usage
+For those who prefer Docker, a `docker-compose.yml` and `Dockerfile` are provided to set up a Jenkins environment with all the prerequisites.
 
-1. Ensure that the Jenkins agent has access to the repository and the necessary credentials.
-2. Add the Jenkinsfile to your Jenkins job.
-3. Run the Jenkins job to execute the pipeline.
+### Using Docker
+
+1. Ensure Docker and Docker Compose are installed on your machine.
+2. Navigate to the project directory.
+3. Run `docker-compose up -d` to start the Jenkins service.
+4. Access Jenkins by navigating to `http://localhost:8080` in your browser.
+
+## Detecting Code Changes
+
+To automatically trigger the Jenkins pipeline upon code changes, you need to set up a webhook in your version control system (e.g., GitHub, Bitbucket).
+
+### For GitHub:
+
+1. Go to your GitHub repository.
+2. Click on `Settings` > `Webhooks`.
+3. Click on `Add webhook`.
+4. Set the `Payload URL` to `http://<JENKINS_URL>/github-webhook/`.
+5. Choose content type as `application/json`.
+6. Select the events you want to trigger the webhook, typically `Just the push event`.
+7. Save the webhook.
+
+### For Bitbucket:
+
+1. Go to your Bitbucket repository.
+2. Click on `Settings` > `Webhooks`.
+3. Click on `Add webhook`.
+4. Set the `URL` to `http://<JENKINS_URL>/bitbucket-hook/`.
+5. Choose `Repository push` as the trigger.
+6. Save the webhook.
+
+Remember to replace `<JENKINS_URL>` with your actual Jenkins server URL.
 
 ## Security
 

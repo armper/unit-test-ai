@@ -84,9 +84,20 @@ def generate_tests_for_class(class_path):
 
     # Call OpenAI to generate or update the test code
     test_code = call_openai_to_generate_test(class_code, existing_test_code)
+
     if test_code is None:
         print(f"Failed to generate test for {class_path}")
         return None
+
+    # Check for leading and trailing code fences and strip them if found
+    if test_code.startswith("```java"):
+        test_code = test_code[len("```java"):]
+
+    if test_code.endswith("```"):
+        test_code = test_code[:-3]
+
+    # Trim any extra whitespace that might be present after stripping
+    test_code = test_code.strip()
 
     # Write the test code to the file
     with open(existing_test_path if existing_test_code else test_base_path.replace(f'{class_name}.java', f'{class_name}Test.java'), 'w') as file:
@@ -94,6 +105,7 @@ def generate_tests_for_class(class_path):
 
     # Return the path for use in the Jenkins pipeline
     return existing_test_path if existing_test_code else test_base_path.replace(f'{class_name}.java', f'{class_name}Test.java')
+
 
 
 # Read the changed files from the file generated earlier in the Jenkins pipeline

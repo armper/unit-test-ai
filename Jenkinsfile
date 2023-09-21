@@ -84,33 +84,36 @@ pipeline {
             }
 
         stage('Commit and Push Generated Test') {
-            steps {
-                script {
-                    // Read the path from the file
-                    def testFilePath = readFile('generated_test_path.txt').trim()
-                    echo "Path to the generated test file: ${testFilePath}"
+    steps {
+        script {
+            // Read the paths from the file
+            def testFilePaths = readFile('generated_test_path.txt').trim().split("\n")
+            testFilePaths.each { path ->
+                echo "Path to the generated test file: ${path}"
 
-                    // Set Git user name and email
-                    sh 'git config user.email "aleoperea@yahoo.com"'
-                    sh 'git config user.name "Jenkins AI"'
+                // Set Git user name and email
+                sh 'git config user.email "aleoperea@yahoo.com"'
+                sh 'git config user.name "Jenkins AI"'
 
-                    // Add the file to git
-                    sh "git add ${testFilePath}"
+                // Add the file to git
+                sh "git add ${path}"
 
-                    // Commit
-                    sh 'git commit -m "Add or update generated unit test for feature XYZ"'
-
-                    // Use credentials to push to the branch
-                    withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                        sh '''
-                git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
-                '''
-                    }
-
-                    echo 'Committed and pushed the generated test.'
-                }
+                // Commit
+                sh 'git commit -m "Add or update generated unit test for feature XYZ"'
             }
+
+            // Use credentials to push to the branch
+            withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                sh '''
+                    git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
+                '''
+            }
+
+            echo 'Committed and pushed the generated tests.'
         }
+    }
+}
+
 
     // Other stages (e.g., build and deploy) as needed
     }

@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        OPENAI_API_KEY = credentials('openai-api-key') // Securely handle the OpenAI API key
+        OPENAI_API_KEY = credentials('OPENAI_API_KEY') // Securely handle the OpenAI API key
     }
 
     stages {

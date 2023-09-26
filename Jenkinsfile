@@ -88,6 +88,11 @@ pipeline {
     script {
         // Read the paths from the file
         def testFilePaths = readFile('generated_test_path.txt').trim().split("\n")
+
+        // Convert the array to a List if it's a primitive array
+        if (testFilePaths instanceof String[]) {
+            testFilePaths = testFilePaths.toList()
+        }
         
         if (testFilePaths.isEmpty()) {
             echo 'No files to commit and push.'
@@ -116,8 +121,8 @@ pipeline {
             echo 'Committed and pushed the generated tests.'
         }
     }
-
 }
+
 
 }
 

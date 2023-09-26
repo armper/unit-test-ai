@@ -84,7 +84,7 @@ pipeline {
             }
 
         stage('Commit and Push Generated Test') {
-   steps {
+    steps {
     script {
         // Read the paths from the file
         def testFilePaths = readFile('generated_test_path.txt').trim().split("\n")
@@ -94,21 +94,25 @@ pipeline {
             testFilePaths = testFilePaths.toList()
         }
         
-        if (testFilePaths.isEmpty()) {
+        if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
             echo 'No files to commit and push.'
         } else {
             testFilePaths.each { path ->
-                echo "Path to the generated test file: ${path}"
+                if (path.trim()) { // Check if the path is not empty or just whitespaces
+                    echo "Path to the generated test file: ${path}"
 
-                // Set Git user name and email
-                sh 'git config user.email "aleoperea@yahoo.com"'
-                sh 'git config user.name "Jenkins AI"'
+                    // Set Git user name and email
+                    sh 'git config user.email "aleoperea@yahoo.com"'
+                    sh 'git config user.name "Jenkins AI"'
 
-                // Add the file to git
-                sh "git add ${path}"
+                    // Add the file to git
+                    sh "git add ${path}"
 
-                // Commit
-                sh 'git commit -m "Add or update generated unit test for feature XYZ"'
+                    // Commit
+                    sh 'git commit -m "Add or update generated unit test for feature XYZ"'
+                } else {
+                    echo "Skipping empty path."
+                }
             }
 
             // Use credentials to push to the branch
@@ -122,7 +126,6 @@ pipeline {
         }
     }
 }
-
 
 }
 

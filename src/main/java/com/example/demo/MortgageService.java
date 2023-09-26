@@ -12,10 +12,9 @@ public class MortgageService {
         double monthlyRate = rate / 100 / 12;
         double numberOfPayments = years * 12;
 
-        double monthlyPayment = principal
+        return principal
                 * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))
                 / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-
-        return monthlyPayment;
     }
+    
 }

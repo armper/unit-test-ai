@@ -85,9 +85,13 @@ pipeline {
 
         stage('Commit and Push Generated Test') {
     steps {
-        script {
-            // Read the paths from the file
-            def testFilePaths = readFile('generated_test_path.txt').trim().split("\n")
+    script {
+        // Read the paths from the file
+        def testFilePaths = readFile('generated_test_path.txt').trim().split("\n")
+        
+        if (testFilePaths.empty) {
+            echo 'No files to commit and push.'
+        } else {
             testFilePaths.each { path ->
                 echo "Path to the generated test file: ${path}"
 
@@ -112,6 +116,8 @@ pipeline {
             echo 'Committed and pushed the generated tests.'
         }
     }
+}
+
 }
 
 

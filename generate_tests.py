@@ -43,7 +43,8 @@ def call_openai_to_generate_test(class_code, existing_test_code=None):
         temperature=0,
         top_p=1,
         frequency_penalty=0,
-        presence_penalty=0)
+        presence_penalty=0
+        )
 
     # Extract the generated test code from the response
     test_code = response.choices[0].message.content.strip()

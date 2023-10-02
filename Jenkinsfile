@@ -57,7 +57,7 @@ pipeline {
             }
         }
 
-        stage('Fix Errors and Re-run Tests') {
+       /*  stage('Fix Errors and Re-run Tests') {
             // Only run this stage if there are errors captured in the file
             when {
                 expression {
@@ -73,7 +73,7 @@ pipeline {
                     sh 'mvn test'
                 }
             }
-        }
+        } */
  
         stage('Commit and Push Generated Test') {
             steps {

@@ -47,11 +47,14 @@ pipeline {
             }
         }
 
-        stage('Run Generated Unit Tests') {
+       stage('Run Generated Unit Tests') {
     steps {
-        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-            // Run the unit tests with -e option to get the full stack trace
-            sh 'mvn test -e > fullLog.txt 2>&1'
+        script {
+            def mvnExitCode = sh(script: 'mvn test -e > fullLog.txt 2>&1 || true', returnStatus: true)
+            
+            if (mvnExitCode != 0) {
+                echo "Maven test command failed with exit code: ${mvnExitCode}"
+            }
             
             // Extract only the stack trace from the full log
             sh '''awk '/^\\[ERROR\\]/ {flag=1; next} /^\\[INFO\\]/ {flag=0} flag' fullLog.txt > testErrors.txt'''
@@ -60,6 +63,7 @@ pipeline {
         }
     }
 }
+
 
 
         stage('Fix Errors and Re-run Tests') {

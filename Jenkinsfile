@@ -63,7 +63,7 @@ pipeline {
                 expression {
                     return fileExists('testErrors.txt') && readFile('testErrors.txt').trim() != ''
                 }
-            }
+            } 
             steps {
                 script {
                     // Call the Python script to check for errors, fix them, and update the test code

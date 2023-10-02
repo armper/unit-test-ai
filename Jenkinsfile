@@ -51,7 +51,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
                     // Run the unit tests and capture errors in a file
-                    sh 'sh 'mvn test > testErrors.txt 2>&1'
+                    sh 'mvn test > testErrors.txt 2>&1'
                     echo 'Ran the generated unit tests.'
                 }
             }

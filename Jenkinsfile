@@ -49,88 +49,86 @@ pipeline {
             }
         }
 
-          stage('Run Generated Unit Tests') {
-        steps {
-            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                // Run the unit tests
-                sh 'mvn test'
-                echo 'Ran the generated unit tests.'
+        stage('Run Generated Unit Tests') {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    // Run the unit tests
+                    sh 'mvn test'
+                    echo 'Ran the generated unit tests.'
+                }
             }
-        }
-        post {
-            failure {
-                script {
-                    // Set the flag if this stage failed
-                    testFailed = true
+            post {
+                failure {
+                    script {
+                        // Set the flag if this stage failed
+                        testFailed = true
+                    }
                 }
             }
         }
-    }
 
-    stage('Fix Errors and Re-run Tests') {
-        // Only run this stage if the testFailed flag is set
-        when {
-            expression {
-                return testFailed
+        stage('Fix Errors and Re-run Tests') {
+            // Only run this stage if the testFailed flag is set
+            when {
+                expression {
+                    return testFailed
+                }
             }
-        }
-        steps {
-            script {
+            steps {
+                script {
                         // Call the Python script to check for errors, fix them, and update the test code
                         sh 'python3 fix_errors.py'
                         echo 'Checked and fixed errors if any.'
                         // Re-run the tests with the fixed code
                         sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Commit and Push Generated Test') {
+            steps {
+                script {
+                    // Read the paths from the file
+                    def testFilePaths = readFile('generated_test_path.txt').trim().split('\n')
+
+                    // Convert the array to a List if it's a primitive array
+                    if (testFilePaths instanceof String[]) {
+                        testFilePaths = testFilePaths.toList()
+                    }
+
+                    if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
+                        echo 'No files to commit and push.'
+        } else {
+                        testFilePaths.each { path ->
+                            if (path.trim()) { // Check if the path is not empty or just whitespaces
+                                echo "Path to the generated test file: ${path}"
+
+                                // Set Git user name and email
+                                sh 'git config user.email "aleoperea@yahoo.com"'
+                                sh 'git config user.name "Jenkins AI"'
+
+                                // Add the file to git
+                                sh "git add ${path}"
+
+                                // Commit
+                                sh 'git commit -m "Add or update generated unit test for feature XYZ"'
+                } else {
+                                echo 'Skipping empty path.'
+                            }
+                        }
+
+                        // Use credentials to push to the branch
+                        withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                            sh '''
+                    git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
+                '''
+                        }
+
+                        echo 'Committed and pushed the generated tests.'
                     }
                 }
             }
-
-        stage('Commit and Push Generated Test') {
-    steps {
-    script {
-        // Read the paths from the file
-        def testFilePaths = readFile('generated_test_path.txt').trim().split("\n")
-
-        // Convert the array to a List if it's a primitive array
-        if (testFilePaths instanceof String[]) {
-            testFilePaths = testFilePaths.toList()
         }
-        
-        if (testFilePaths.isEmpty() || (testFilePaths.size() == 1 && testFilePaths[0].isEmpty())) {
-            echo 'No files to commit and push.'
-        } else {
-            testFilePaths.each { path ->
-                if (path.trim()) { // Check if the path is not empty or just whitespaces
-                    echo "Path to the generated test file: ${path}"
-
-                    // Set Git user name and email
-                    sh 'git config user.email "aleoperea@yahoo.com"'
-                    sh 'git config user.name "Jenkins AI"'
-
-                    // Add the file to git
-                    sh "git add ${path}"
-
-                    // Commit
-                    sh 'git commit -m "Add or update generated unit test for feature XYZ"'
-                } else {
-                    echo "Skipping empty path."
-                }
-            }
-
-            // Use credentials to push to the branch
-            withCredentials([usernamePassword(credentialsId: 'github-password', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                sh '''
-                    git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/armper/unit-test-ai.git HEAD:main
-                '''
-            }
-
-            echo 'Committed and pushed the generated tests.'
-        }
-    }
-}
-
-}
-
 
     // Other stages (e.g., build and deploy) as needed
     }

@@ -16,6 +16,6 @@ public class MortgageService {
                 * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))
                 / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
     }
-    
+      
 }
  

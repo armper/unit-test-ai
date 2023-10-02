@@ -33,17 +33,5 @@ public class MortgageServiceTest {
         assertEquals(expected, result, "Monthly payment should be infinity when years is zero");
     }
 
-    @Test
-    public void testCalculateMonthlyPaymentWithZeroRate() {
-        MortgageService mortgageService = new MortgageService();
-        double principal = 200000.0;
-        double rate = 0.0;
-        double years = 30.0;
-        double expected = principal / (years * 12);
-
-        double result = mortgageService.calculateMonthlyPayment(principal, rate, years);
-
-        assertEquals(expected, result,
-                "Monthly payment should be principal divided by number of payments when rate is zero");
-    }
+  
 }

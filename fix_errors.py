@@ -1,16 +1,19 @@
 import os
+import xml.etree.ElementTree as ET
 import openai
 
-def check_test_errors(error_file):
-    """Check if there are any test errors by reading the error file."""
-    with open(error_file, 'r') as file:
-        content = file.read().strip()
-        return bool(content)
+def extract_errors_from_xml(xml_file):
+    """Extract the error messages and stack traces from the XML file."""
+    tree = ET.parse(xml_file)
+    root = tree.getroot()
+    error_messages = []
 
-def extract_errors_from_file(error_file):
-    """Extract the error messages from the error file."""
-    with open(error_file, 'r') as file:
-        return file.read()
+    for testcase in root.findall('testcase'):
+        for error in testcase.findall('error'):
+            error_messages.append(error.get('message'))
+            error_messages.append(error.text)  # This line extracts the stack trace
+
+    return '\n'.join(error_messages)
 
 def fix_errors(test_path, current_unit_test_code, test_errors):
     """Attempt to fix the test errors using the OpenAI API."""
@@ -48,7 +51,16 @@ def fix_errors(test_path, current_unit_test_code, test_errors):
 if __name__ == "__main__":
     openai.api_key = os.environ['OPENAI_API_KEY']
 
-    error_file = 'testErrors.txt'
+    surefire_reports_dir = 'target/surefire-reports'
+    all_errors = []
+
+    for file in os.listdir(surefire_reports_dir):
+        if file.endswith(".xml"):
+            file_path = os.path.join(surefire_reports_dir, file)
+            errors = extract_errors_from_xml(file_path)
+            if errors:
+                all_errors.append(errors)
+
     error_detected = False
 
     # Ensure the fixed_tests directory exists
@@ -61,7 +73,7 @@ if __name__ == "__main__":
 
     print("Current Working Directory:", os.getcwd())
 
-    if check_test_errors(error_file):
+    if all_errors:
         print("Test errors detected. Attempting to fix...")
 
         for test_path in generated_tests:
@@ -73,7 +85,7 @@ if __name__ == "__main__":
                 current_unit_test_code = code_file.read()
 
             # Extracting test errors from the error file
-            test_errors = extract_errors_from_file(error_file)
+            test_errors = '\n'.join(all_errors)
 
             fix_errors(test_path, current_unit_test_code, test_errors)
             error_detected = True

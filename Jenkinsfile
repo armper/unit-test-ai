@@ -48,14 +48,19 @@ pipeline {
         }
 
         stage('Run Generated Unit Tests') {
-            steps {
-                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                    // Run the unit tests and capture errors in a file
-                    sh 'mvn test > testErrors.txt 2>&1'
-                    echo 'Ran the generated unit tests.'
-                }
-            }
+    steps {
+        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+            // Run the unit tests with -e option to get the full stack trace
+            sh 'mvn test -e > fullLog.txt 2>&1'
+            
+            // Extract only the stack trace from the full log
+            sh '''awk '/^\\[ERROR\\]/ {flag=1; next} /^\\[INFO\\]/ {flag=0} flag' fullLog.txt > testErrors.txt'''
+            
+            echo 'Ran the generated unit tests and extracted the error stack trace.'
         }
+    }
+}
+
 
         stage('Fix Errors and Re-run Tests') {
             // Only run this stage if there are errors captured in the file

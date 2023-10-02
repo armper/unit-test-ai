@@ -1,3 +1,6 @@
+Your existing test seems to be already using Junit 5 and it is correctly written. However, if you want to add more tests to cover different scenarios, you can add more test methods. Here is an example:
+
+```java
 package com.example.demo;
 
 import org.junit.jupiter.api.Test;
@@ -17,5 +20,31 @@ public class MortgageServiceTest {
         double result = mortgageService.calculateMonthlyPayment(principal, rate, years);
 
         assertEquals(expected, result, delta, "Monthly payment should be 1073.64");
+    }
+
+    @Test
+    public void testCalculateMonthlyPaymentWithZeroYears() {
+        MortgageService mortgageService = new MortgageService();
+        double principal = 200000.0;
+        double rate = 5.0;
+        double years = 0.0;
+        double expected = Double.POSITIVE_INFINITY;
+
+        double result = mortgageService.calculateMonthlyPayment(principal, rate, years);
+
+        assertEquals(expected, result, "Monthly payment should be infinity when years is zero");
+    }
+
+    @Test
+    public void testCalculateMonthlyPaymentWithZeroRate() {
+        MortgageService mortgageService = new MortgageService();
+        double principal = 200000.0;
+        double rate = 0.0;
+        double years = 30.0;
+        double expected = principal / (years * 12);
+
+        double result = mortgageService.calculateMonthlyPayment(principal, rate, years);
+
+        assertEquals(expected, result, "Monthly payment should be principal divided by number of payments when rate is zero");
     }
 }

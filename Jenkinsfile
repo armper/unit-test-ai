@@ -1,5 +1,3 @@
-def testFailed = false
-
 pipeline {
     agent any
 
@@ -52,35 +50,27 @@ pipeline {
         stage('Run Generated Unit Tests') {
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                    // Run the unit tests
-                    sh 'mvn test'
+                    // Run the unit tests and capture errors in a file
+                    sh 'mvn test 2> testErrors.txt'
                     echo 'Ran the generated unit tests.'
-                }
-            }
-            post {
-                failure {
-                    script {
-                        // Set the flag if this stage failed
-                        testFailed = true
-                    }
                 }
             }
         }
 
         stage('Fix Errors and Re-run Tests') {
-            // Only run this stage if the testFailed flag is set
+            // Only run this stage if there are errors captured in the file
             when {
                 expression {
-                    return testFailed
+                    return fileExists('testErrors.txt') && readFile('testErrors.txt').trim() != ''
                 }
             }
             steps {
                 script {
-                        // Call the Python script to check for errors, fix them, and update the test code
-                        sh 'python3 fix_errors.py'
-                        echo 'Checked and fixed errors if any.'
-                        // Re-run the tests with the fixed code
-                        sh 'mvn test'
+                    // Call the Python script to check for errors, fix them, and update the test code
+                    sh 'python3 fix_errors.py'
+                    echo 'Checked and fixed errors if any.'
+                    // Re-run the tests with the fixed code
+                    sh 'mvn test'
                 }
             }
         }
